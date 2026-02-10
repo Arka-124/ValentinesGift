@@ -155,138 +155,247 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect } = React;
+  const { useState, useEffect } = React;
 
-    function App() {
-      const [page, setPage] = useState(1);
-      const [isTransitioning, setIsTransitioning] = useState(false);
-      const [isNoAbsolute, setIsNoAbsolute] = useState(false);
-      const [noPosition, setNoPosition] = useState({ top: 'auto', left: 'auto' });
-      const [showFlash, setShowFlash] = useState(false);
-      const [showYippee, setShowYippee] = useState(false);
+  // --- CONFIGURATION: SET YOUR DATES HERE ---
+  // Format: "YYYY-MM-DD"
+  const UNLOCK_DATES = {
+    3: "2025-02-10", // Page 3 (Teddy Day) unlocks Feb 10
+    4: "2025-02-11", // Page 4 (Promise Day) unlocks Feb 11
+    5: "2025-02-12", // Page 5 (Hug Day) unlocks Feb 12
+    6: "2025-02-13", // Page 6 (Kiss Day) unlocks Feb 13
+    7: "2025-02-14", // Page 7 (The Final Reveal) unlocks Feb 14
+    8: "2025-02-14"  // Page 8 (Closing Message) unlocks Feb 14
+  };
+  // ------------------------------------------
 
-      const triggerPageChange = (nextPage) => {
-        setIsTransitioning(true);
-        setTimeout(() => {
-          setPage(nextPage);
-          setIsTransitioning(false);
-        }, 600); // Matches CSS transition time
+  function App() {
+    const [page, setPage] = useState(1);
+    const [isTransitioning, setIsTransitioning] = useState(false);
+    const [isNoAbsolute, setIsNoAbsolute] = useState(false);
+    const [noPosition, setNoPosition] = useState({ top: 'auto', left: 'auto' });
+    const [showFlash, setShowFlash] = useState(false);
+    const [showYippee, setShowYippee] = useState(false);
+    const [isNextUnlocked, setIsNextUnlocked] = useState(false);
+    const [timeMessage, setTimeMessage] = useState("");
+
+    // CHECK DATE LOGIC
+    useEffect(() => {
+      const checkDate = () => {
+        const nextPage = page + 1;
+        
+        // If there is no specific unlock date for the next page, it's open (Page 1 -> 2)
+        if (!UNLOCK_DATES[nextPage]) {
+          setIsNextUnlocked(true);
+          setTimeMessage("");
+          return;
+        }
+
+        const now = new Date();
+        const unlockDate = new Date(UNLOCK_DATES[nextPage] + "T00:00:00");
+
+        if (now >= unlockDate) {
+          setIsNextUnlocked(true);
+          setTimeMessage("");
+        } else {
+          setIsNextUnlocked(false);
+          const diff = unlockDate - now;
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+          const minutes = Math.floor((diff / (1000 * 60)) % 60);
+          
+          if (days > 0) setTimeMessage(`Opens in ${days}d ${hours}h`);
+          else if (hours > 0) setTimeMessage(`Opens in ${hours}h ${minutes}m`);
+          else setTimeMessage(`Opens in ${minutes}m`);
+        }
       };
 
-      const moveNoButton = () => {
-        if (!isNoAbsolute) setIsNoAbsolute(true);
-        const maxX = window.innerWidth - 160;
-        const maxY = window.innerHeight - 60;
-        setNoPosition({
-          left: `${Math.random() * maxX}px`,
-          top: `${Math.random() * maxY}px`
-        });
-        setShowFlash(true);
-        setTimeout(() => setShowFlash(false), 700);
-      };
+      checkDate();
+      const timer = setInterval(checkDate, 60000); 
+      return () => clearInterval(timer);
+    }, [page]);
 
-      const handleYes = () => {
-        setShowYippee(true);
-        setTimeout(() => {
-          setShowYippee(false);
-          triggerPageChange(2);
-        }, 2500);
-      };
+    const triggerPageChange = (nextPage) => {
+      if (!isNextUnlocked && UNLOCK_DATES[nextPage]) {
+         alert(`No cheating! 😜 This unlocks on ${UNLOCK_DATES[nextPage]}`);
+         return;
+      }
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setPage(nextPage);
+        setIsTransitioning(false);
+      }, 600); 
+    };
 
-      return (
-        <div className="container">
-          {showFlash && <div className="flash-text">Wrong choice! Try again 😜</div>}
+    const moveNoButton = () => {
+      if (!isNoAbsolute) setIsNoAbsolute(true);
+      const maxX = window.innerWidth - 160;
+      const maxY = window.innerHeight - 60;
+      setNoPosition({
+        left: `${Math.random() * maxX}px`,
+        top: `${Math.random() * maxY}px`
+      });
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 700);
+    };
 
-          {showYippee && (
-            <div className="yippee-screen">
-              <h1 style={{ fontSize: '4rem' }}>Yippeeee! 🎉</h1>
-              <img src="ted-blow-a-kiss.gif" alt="Yippee" style={{ maxWidth: '300px', margin: '20px', borderRadius: '15px' }} />
-              <audio autoPlay>
-                <source src="yippee-tbh.mp3" type="audio/mpeg" />
-              </audio>
+    const handleYes = () => {
+      setShowYippee(true);
+      setTimeout(() => {
+        setShowYippee(false);
+        triggerPageChange(2);
+      }, 2500);
+    };
+
+    return (
+      <div className="container">
+        {showFlash && <div className="flash-text">Wrong choice! Try again 😜</div>}
+
+        {showYippee && (
+          <div className="yippee-screen">
+            <h1 style={{ fontSize: '4rem' }}>Yippeeee! 🎉</h1>
+            <img src="ted-blow-a-kiss.gif" alt="Yippee" style={{ maxWidth: '300px', margin: '20px', borderRadius: '15px' }} />
+            <audio autoPlay>
+              <source src="yippee-tbh.mp3" type="audio/mpeg" />
+            </audio>
+          </div>
+        )}
+
+        <div className={`fade-layer ${isTransitioning ? 'fade-out' : ''}`}>
+
+          {/* PAGE 1: PROPOSAL (Always Open) */}
+          {page === 1 && (
+            <div className="content">
+              <h1>Arka sent you a request</h1>
+              <p style={{ fontSize: '1.4rem', color: '#ff4757' }}>Will you be my Valentine?</p>
+              <div className="button-container">
+                <button className="btn btn-yes" onClick={handleYes}>Yes ❤️</button>
+                <button
+                  className={`btn btn-no ${isNoAbsolute ? 'absolute' : ''}`}
+                  onMouseEnter={isNoAbsolute ? moveNoButton : null}
+                  onClick={moveNoButton}
+                  style={{ top: noPosition.top, left: noPosition.left }}
+                >No</button>
+              </div>
             </div>
           )}
 
-          {/* Fade Layer handles the animation for the main content */}
-          <div className={`fade-layer ${isTransitioning ? 'fade-out' : ''}`}>
-
-            {/* PAGE 1 */}
-            {page === 1 && (
-              <div className="content">
-                <h1>Arka sent you a request</h1>
-                <p style={{ fontSize: '1.4rem', color: '#ff4757' }}>Will you be my Valentine?</p>
-                <div className="button-container">
-                  <button className="btn btn-yes" onClick={handleYes}>Yes ❤️</button>
-                  <button
-                    className={`btn btn-no ${isNoAbsolute ? 'absolute' : ''}`}
-                    onMouseEnter={isNoAbsolute ? moveNoButton : null}
-                    onClick={moveNoButton}
-                    style={{ top: noPosition.top, left: noPosition.left }}
-                  >No</button>
-                </div>
+          {/* PAGE 2: STORY INTRO (Always Open) */}
+          {page === 2 && (
+            <div className="content">
+              <h1>Our First Valentine's ❤️</h1>
+              <div className="story-text">
+                This is our first Valentine's together, and my first one ever.
+                So I have prepared a something special for us.
+                <br/><br/>
+                Every day until the 14th, a new page will unlock. Come back tomorrow!
               </div>
-            )}
-
-            {/* PAGE 2 */}
-            {page === 2 && (
-              <div className="content">
-                <h1>Our Story ❤️</h1>
-                <div className="story-text">
-                  This is our first Valentine's together, and my first one ever.
-                  So I have prepared a something special for us.
-                  Hope you like it !
-                </div>
-              </div>
-            )}
-
-            {/* PAGE 3 */}
-            {page === 3 && (
-              <div className="content">
-                <h1>A Little Note...</h1>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', width: '100%', marginTop: '20px' }}>
-                  <div style={{ width: '100%', padding: '10px', background: '#fff0f3', borderRadius: '15px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
-                    <img src="Photo1.png" alt="Us 1" style={{ width: '100%', borderRadius: '10px' }} />
-                  </div>
-                  <div style={{ width: '100%', padding: '10px', background: '#fff0f3', borderRadius: '15px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
-                    <img src="Photo2.png" alt="Us 2" style={{ width: '100%', borderRadius: '10px' }} />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* PAGE 4 */}
-            {page === 4 && (
-              <div className="content">
-                <h1 style={{ fontSize: 'clamp(1.2rem, 6vw, 3rem)', lineHeight: '1.2', letterSpacing: '2px', wordBreak: 'normal' }}>HAPPY VALENTINE'S DAY! ❤️</h1>
-                <p>To many more adventures together.</p>
-              </div>
-            )}
-          </div>
-
-          {/* FIXED NEXT BUTTON (Bottom Right) */}
-          {page >= 2 && page < 4 && (
-            <button
-              className={`btn btn-next-fixed ${isTransitioning ? 'fade-out' : ''}`}
-              onClick={() => triggerPageChange(page + 1)}
-            >
-              Next →
-            </button>
+            </div>
           )}
 
-          {/* Persistent Audio for Pages 2, 3, 4 */}
-          {
-            page >= 2 && (
-              <audio autoPlay loop>
-                <source src="TomarGaan.mp3" type="audio/mpeg" />
-              </audio>
-            )
-          }
-        </div >
-      );
-    }
+          {/* PAGE 3: TEDDY DAY (Feb 10) */}
+          {page === 3 && (
+            <div className="content">
+              <h1>Happy Teddy Day! 🧸</h1>
+              <div className="story-text">
+                You are softer and cuter than any teddy bear I could buy.
+                <br />
+                Sending you a big virtual hug today!
+                <br />
+                {/* ADD YOUR IMAGE/CONTENT HERE */}
+              </div>
+            </div>
+          )}
 
-    ReactDOM.render(<App />, document.getElementById('root'));
-  </script>
+          {/* PAGE 4: PROMISE DAY (Feb 11) */}
+          {page === 4 && (
+            <div className="content">
+              <h1>Happy Promise Day 🤞</h1>
+              <div className="story-text">
+                I promise to always be there for you, through the laughs and the tears.
+                <br />
+                (Write your own promise here!)
+              </div>
+            </div>
+          )}
+
+           {/* PAGE 5: HUG DAY (Feb 12) */}
+           {page === 5 && (
+            <div className="content">
+              <h1>Happy Hug Day 🤗</h1>
+              <div className="story-text">
+                I wish I could hug you right now. 
+                Consider this a raincheck for a very long hug when I see you.
+              </div>
+            </div>
+          )}
+
+           {/* PAGE 6: KISS DAY (Feb 13) */}
+           {page === 6 && (
+            <div className="content">
+              <h1>Happy Kiss Day 💋</h1>
+              <div className="story-text">
+                Sending you a thousand kisses. 
+                <br/>
+                Muah!
+              </div>
+            </div>
+          )}
+
+          {/* PAGE 7: VALENTINE'S PHOTOS (Feb 14) - OLD PAGE 3 */}
+          {page === 7 && (
+            <div className="content">
+              <h1>Us ❤️</h1>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', width: '100%', marginTop: '20px' }}>
+                <div style={{ width: '100%', padding: '10px', background: '#fff0f3', borderRadius: '15px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
+                  <img src="Photo1.png" alt="Us 1" style={{ width: '100%', borderRadius: '10px' }} />
+                </div>
+                <div style={{ width: '100%', padding: '10px', background: '#fff0f3', borderRadius: '15px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
+                  <img src="Photo2.png" alt="Us 2" style={{ width: '100%', borderRadius: '10px' }} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PAGE 8: FINAL MESSAGE (Feb 14) - OLD PAGE 4 */}
+          {page === 8 && (
+            <div className="content">
+              <h1 style={{ fontSize: 'clamp(1.2rem, 6vw, 3rem)', lineHeight: '1.2', letterSpacing: '2px', wordBreak: 'normal' }}>HAPPY VALENTINE'S DAY! ❤️</h1>
+              <p>To many more adventures together.</p>
+            </div>
+          )}
+        </div>
+
+        {/* LOCKED NEXT BUTTON */}
+        {page >= 2 && page < 8 && (
+          <button
+            className={`btn btn-next-fixed ${isTransitioning ? 'fade-out' : ''}`}
+            onClick={() => triggerPageChange(page + 1)}
+            disabled={!isNextUnlocked}
+            style={{
+              background: isNextUnlocked ? '#ff4757' : '#bdc3c7',
+              cursor: isNextUnlocked ? 'pointer' : 'not-allowed',
+              opacity: isNextUnlocked ? 1 : 0.8
+            }}
+          >
+            {isNextUnlocked ? 'Next →' : `🔒 ${timeMessage}`}
+          </button>
+        )}
+
+        {/* Audio */}
+        {
+          page >= 2 && (
+            <audio autoPlay loop>
+              <source src="TomarGaan.mp3" type="audio/mpeg" />
+            </audio>
+          )
+        }
+      </div >
+    );
+  }
+
+  ReactDOM.render(<App />, document.getElementById('root'));
+</script>
 </body>
 
 </html>
