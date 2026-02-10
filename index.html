@@ -329,56 +329,94 @@
   </div>
 )}
 
- {/* PAGE 4: HUG DAY (Squeezable Bear) */}
+ {/* PAGE 4: HUG DAY (Foggy Window Reveal) */}
 {page === 4 && (
-  <div className="content">
-    <h1>The Squeezable Bear 🧸</h1>
-    <div className="story-text">
-      <p>I sent you a digital bear.</p>
-      <p><strong>SQUEEZE HIM</strong> (Click/Tap rapidly) to feel the love!</p>
+  <div className="content" style={{ position: 'relative', overflow: 'hidden' }}>
+    <h1>Wipe Away The Distance 🌫️</h1>
+    <p style={{ marginBottom: '10px' }}>
+      The distance feels like a fog between us.<br/>
+      <strong>Rub the screen</strong> to clear it and find me.
+    </p>
 
-      <div 
-        style={{
-          marginTop: '30px',
-          cursor: 'pointer',
-          transition: 'transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-          display: 'inline-block',
-          userSelect: 'none'
-        }}
-        onMouseDown={(e) => {
-          e.currentTarget.style.transform = 'scale(0.8, 0.8)'; // Squish
-          e.currentTarget.innerText = "😣"; // Face change
-        }}
-        onMouseUp={(e) => {
-          e.currentTarget.style.transform = 'scale(1.1, 1.1)'; // Bounce back big
-          e.currentTarget.innerText = "🧸";
-          setTimeout(() => e.currentTarget.style.transform = 'scale(1, 1)', 150); // Reset
-          
-          // Confetti Logic
-          const burst = document.createElement('div');
-          burst.innerText = "❤️";
-          burst.style.position = 'fixed';
-          burst.style.left = e.clientX + 'px';
-          burst.style.top = e.clientY + 'px';
-          burst.style.animation = 'floatUp 1s ease-out forwards';
-          document.body.appendChild(burst);
-          setTimeout(() => burst.remove(), 1000);
-        }}
-      >
-        <span style={{fontSize: '8rem', display: 'block'}}>🧸</span>
+    <div style={{ position: 'relative', width: '300px', height: '300px', margin: '0 auto' }}>
+      
+      {/* 1. THE HIDDEN CONTENT (Underneath) */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: '#ffecd2',
+        borderRadius: '15px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1
+      }}>
+        {/* PUT YOUR PHOTO HERE INSTEAD OF THIS EMOJI */}
+        <span style={{ fontSize: '5rem' }}>Photo4.JPG</span> 
+        <h3 style={{ color: '#ff4757', marginTop: '10px' }}>I'm right here.</h3>
       </div>
 
-      <style>{`
-        @keyframes floatUp {
-          0% { transform: translateY(0) scale(1); opacity: 1; }
-          100% { transform: translateY(-100px) scale(0); opacity: 0; }
-        }
-      `}</style>
-      
-      <p style={{marginTop: '20px', fontSize: '0.9rem', color: '#888'}}>
-        (He loves tight hugs, don't worry)
-      </p>
+      {/* 2. THE FOG (Canvas Overlay) */}
+      <canvas
+        width={300}
+        height={300}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 2,
+          borderRadius: '15px',
+          cursor: 'pointer',
+          touchAction: 'none' // Prevents scrolling while rubbing
+        }}
+        ref={(canvas) => {
+          if (!canvas) return;
+          const ctx = canvas.getContext('2d');
+          
+          // Only draw the grey fog ONCE when mounted
+          if (!canvas.getAttribute('data-drawn')) {
+            ctx.fillStyle = '#b2bec3'; // Grey fog color
+            ctx.fillRect(0, 0, 300, 300);
+            
+            // Add some text instruction on the fog
+            ctx.fillStyle = '#636e72';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText("Rub me!", 150, 150);
+            
+            canvas.setAttribute('data-drawn', 'true');
+          }
+
+          // The erasing function
+          const scratch = (x, y) => {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 25, 0, Math.PI * 2); // Brush size
+            ctx.fill();
+          };
+
+          // Mouse Events
+          canvas.onmousemove = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            if (e.buttons > 0) scratch(e.clientX - rect.left, e.clientY - rect.top);
+          };
+
+          // Touch Events (Mobile)
+          canvas.ontouchmove = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            scratch(touch.clientX - rect.left, touch.clientY - rect.top);
+          };
+        }}
+      />
     </div>
+    <p style={{ fontSize: '0.8rem', marginTop: '15px', color: '#888' }}>
+      (Keep rubbing until you see me clearly)
+    </p>
   </div>
 )}
 
