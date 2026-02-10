@@ -160,11 +160,11 @@
   // --- CONFIGURATION: SET YOUR DATES HERE ---
   // Format: "YYYY-MM-DD"
   const UNLOCK_DATES = {
-    3: "2025-02-11", // Page 4 (Promise Day) unlocks Feb 11
-    4: "2026-02-12", // Page 5 (Hug Day) unlocks Feb 12
-    5: "2026-02-13", // Page 6 (Kiss Day) unlocks Feb 13
-    6: "2026-02-14", // Page 7 (The Final Reveal) unlocks Feb 14
-    7: "2026-02-14"  // Page 8 (Closing Message) unlocks Feb 14
+    3: "2025-02-11", // Page 3 (Promise Day) unlocks Feb 11
+    4: "2025-02-12", // Page 4 (Hug Day) unlocks Feb 12
+    5: "2025-02-13", // Page 5 (Kiss Day) unlocks Feb 13
+    6: "2025-02-14", // Page 6 (The Final Reveal) unlocks Feb 14
+    7: "2025-02-14"  // Page 7 (Closing Message) unlocks Feb 14
   };
   // ------------------------------------------
 
@@ -294,7 +294,7 @@
 
           
 
-          {/* PAGE 4: PROMISE DAY */}
+          {/* PAGE 3: PROMISE DAY */}
 {page === 3 && (
   <div className="content">
     <h1>Terms of Endearment 📜</h1>
@@ -329,28 +329,128 @@
   </div>
 )}
 
-           {/* PAGE 4: HUG DAY (Feb 12) */}
-           {page === 5 && (
-            <div className="content">
-              <h1>Happy Hug Day 🤗</h1>
-              <div className="story-text">
-                I wish I could hug you right now. 
-                Consider this a raincheck for a very long hug when I see you.
-              </div>
-            </div>
-          )}
+           {/* PAGE 4: HUG DAY */}
+{page === 4 && (
+  <div className="content">
+    <h1>Emergency Hug Station 🚨</h1>
+    <div className="story-text">
+      <p>Khub miss korchis.....tai na ? Press the button below immediately.</p>
+      
+      <button 
+        style={{
+          background: '#ff4757',
+          color: 'white',
+          border: 'none',
+          padding: '15px 30px',
+          fontSize: '1.2rem',
+          borderRadius: '50px',
+          cursor: 'pointer',
+          marginTop: '20px',
+          boxShadow: '0 5px 15px rgba(255, 71, 87, 0.4)'
+        }}
+        onClick={(e) => {
+          e.target.innerText = "🤗 SQUEEEEEZE! 🤗";
+          e.target.style.transform = "scale(0.95)";
+          setTimeout(() => {
+             e.target.innerText = "Send Another Hug";
+             e.target.style.transform = "scale(1)";
+          }, 2000);
+        }}
+      >
+        Send Hug 🫂
+      </button>
+      
+      <p style={{marginTop: '20px', fontSize: '0.9rem'}}>
+        *Note: Real hugs are currently being shipped to your location.*
+      </p>
+    </div>
+  </div>
+)}
 
-           {/* PAGE 5: KISS DAY (Feb 13) */}
-           {page === 6 && (
-            <div className="content">
-              <h1>Happy Kiss Day 💋</h1>
-              <div className="story-text">
-                Sending you a thousand kisses. 
-                <br/>
-                Muah!
-              </div>
-            </div>
-          )}
+           {/* PAGE 5: KISS DAY (Trajectory Simulator) */}
+{page === 5 && (
+  <div className="content">
+    <h1>Kiss Trajectory 💋</h1>
+    
+    {/* Simulation Container */}
+    <div style={{
+      background: '#1a1a1a',
+      color: '#0f0',
+      fontFamily: 'monospace',
+      padding: '20px',
+      borderRadius: '10px',
+      textAlign: 'left',
+      height: '300px',
+      overflow: 'hidden',
+      position: 'relative',
+      boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+      marginTop: '20px'
+    }}>
+      {/* The Radar Scanner Animation */}
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '200px',
+        height: '200px',
+        border: '2px solid #0f0',
+        borderRadius: '50%',
+        opacity: 0.3
+      }}></div>
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        width: '100px',
+        height: '2px',
+        background: '#0f0',
+        transformOrigin: '0% 0%',
+        animation: 'spin 2s linear infinite' // Note: You'd need to add keyframes for spin in CSS or use inline style for rotation if possible, but this visual is enough
+      }}></div>
+
+      {/* Dynamic Text Output */}
+      <p>> Initiating Kiss Sequence...</p>
+      <p>> Calculating Distance... <span style={{color: '#ff4757'}}>LDR_MODE_ACTIVE</span></p>
+      <p>> Wind Speed: 12km/h SE</p>
+      <p>> Heartbeat: <span style={{animation: 'pulse 0.5s infinite'}}>120 BPM</span></p>
+      <p>> Target Locked: <span style={{color: 'yellow'}}>MY VALENTINE</span></p>
+      <br/>
+      <p style={{textAlign: 'center', fontSize: '1.5rem', marginTop: '20px', color: 'white'}}>
+        INCOMING...
+      </p>
+      
+      {/* The Flying Kiss Emoji */}
+      <div style={{
+        position: 'absolute',
+        left: '0',
+        bottom: '20px',
+        fontSize: '3rem',
+        animation: 'flyAcross 3s ease-in-out infinite'
+      }}>
+        💋
+      </div>
+      
+      {/* Add this style block locally for the animations */}
+      <style>{`
+        @keyframes flyAcross {
+          0% { left: -50px; bottom: 20px; transform: rotate(0deg); }
+          50% { left: 50%; bottom: 100px; transform: rotate(180deg); }
+          100% { left: 110%; bottom: 20px; transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+          0% { opacity: 1; }
+          50% { opacity: 0.5; }
+          100% { opacity: 1; }
+        }
+      `}</style>
+    </div>
+
+    <p style={{marginTop: '15px', fontSize: '0.9rem'}}>
+      *Estimated arrival time: Immediate*
+    </p>
+  </div>
+)}
 
           {/* PAGE 6: VALENTINE'S PHOTOS (Feb 14) - OLD PAGE 3 */}
           {page === 7 && (
