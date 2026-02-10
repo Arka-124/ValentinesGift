@@ -169,6 +169,7 @@
   // ------------------------------------------
 
   function App() {
+    const [kissIntroDone, setKissIntroDone] = useState(false);
     const [page, setPage] = useState(1);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [isNoAbsolute, setIsNoAbsolute] = useState(false);
@@ -420,86 +421,100 @@
   </div>
 )}
 
-           {/* PAGE 5: KISS DAY (Constellation) */}
+           {/* PAGE 5: KISS DAY (Floating Lanterns) */}
 {page === 5 && (
-  <div className="content" style={{ background: '#0c0c1c', color: '#fff', boxShadow: '0 0 50px #1a1a2e inset' }}>
-    <h1>Galactic Kiss 🌌</h1>
-    <p style={{marginBottom: '20px'}}>Connect the stars to reveal the message.</p>
-    
-    <div style={{ position: 'relative', height: '250px', width: '100%' }}>
-       {/* We use a self-invoking function to manage specific state for this game */}
-       {(() => {
-         // COORDINATES FOR A LIP SHAPE
-         const stars = [
-           {id: 1, x: 20, y: 100}, {id: 2, x: 80, y: 80}, {id: 3, x: 150, y: 90}, 
-           {id: 4, x: 220, y: 80}, {id: 5, x: 280, y: 100}, // Top lip line
-           {id: 6, x: 220, y: 130}, {id: 7, x: 150, y: 140}, {id: 8, x: 80, y: 130}, {id: 9, x: 20, y: 100} // Bottom lip loop
-         ];
+  <div className="content">
+    {/* LOGIC: Handle the Intro Timer */}
+    {(() => {
+      React.useEffect(() => {
+        if (!kissIntroDone) {
+           const timer = setTimeout(() => setKissIntroDone(true), 3000); // 3 seconds intro
+           return () => clearTimeout(timer);
+        }
+      }, []);
+    })()}
 
-         // Use React State (this is a hack for single-file copy-paste)
-         // In a real app, define state at top of App component: const [connected, setConnected] = useState([1]);
-         if (!window.connectedStars) window.connectedStars = [1];
-         
-         // Force update helper
-         const [, forceUpdate] = React.useReducer(x => x + 1, 0);
-
-         const handleClick = (id) => {
-           const last = window.connectedStars[window.connectedStars.length - 1];
-           // Allow connecting only next sequential star or closing the loop
-           if (id === last + 1 || (last === 9 && id === 1)) { 
-             window.connectedStars.push(id);
-             forceUpdate();
-           }
-         };
-
-         const isComplete = window.connectedStars.length >= 9 && window.connectedStars.includes(9);
-
-         return (
-           <svg width="300" height="200" style={{ overflow: 'visible', margin: '0 auto', display: 'block' }}>
-             {/* Draw Lines */}
-             {window.connectedStars.map((starId, i) => {
-               if (i === 0) return null;
-               const prev = stars.find(s => s.id === window.connectedStars[i-1]);
-               const curr = stars.find(s => s.id === starId);
-               return (
-                 <line 
-                   key={i} x1={prev.x} y1={prev.y} x2={curr.x} y2={curr.y} 
-                   stroke={isComplete ? "#ff00de" : "white"} 
-                   strokeWidth={isComplete ? "4" : "2"}
-                   style={{ transition: 'all 0.5s', filter: isComplete ? 'drop-shadow(0 0 10px #ff00de)' : 'none' }}
-                 />
-               );
-             })}
-
-             {/* Draw Stars */}
-             {stars.map((s) => (
-               <g key={s.id} onClick={() => handleClick(s.id)} style={{ cursor: 'pointer' }}>
-                 <circle 
-                   cx={s.x} cy={s.y} r={window.connectedStars.includes(s.id) ? 6 : 4} 
-                   fill={window.connectedStars.includes(s.id) ? "#ffd700" : "white"}
-                   className="star" 
-                 />
-                 {/* Pulse animation for the next target */}
-                 {!isComplete && s.id === (window.connectedStars[window.connectedStars.length-1] + 1) && (
-                   <circle cx={s.x} cy={s.y} r="15" fill="none" stroke="white" opacity="0.5">
-                     <animate attributeName="r" from="10" to="20" dur="1s" repeatCount="indefinite" />
-                     <animate attributeName="opacity" from="0.8" to="0" dur="1s" repeatCount="indefinite" />
-                   </circle>
-                 )}
-               </g>
-             ))}
-
-             {/* Completion Message */}
-             {isComplete && (
-               <text x="150" y="180" textAnchor="middle" fill="#ff00de" fontSize="20" style={{ animation: 'fadeIn 1s' }}>
-                 KISS UPLOADED TO THE STARS
-               </text>
-             )}
-           </svg>
-         );
-       })()}
+    {/* VIEW 1: INTRO TEXT (Fades out) */}
+    <div style={{
+      opacity: kissIntroDone ? 0 : 1,
+      transition: 'opacity 1s ease-in-out',
+      position: kissIntroDone ? 'absolute' : 'relative',
+      pointerEvents: 'none',
+      zIndex: 10
+    }}>
+      <h1 style={{ fontSize: '2.5rem', color: '#ff4757' }}>Happy KISS Day babyy 💋💋</h1>
     </div>
-    <style>{`@keyframes fadeIn { from {opacity:0} to {opacity:1} }`}</style>
+
+    {/* VIEW 2: THE LANTERN CONTAINER (Fades in) */}
+    <div style={{
+      opacity: kissIntroDone ? 1 : 0,
+      transition: 'opacity 1s ease-in-out 1s', // Delays fade-in slightly
+      height: kissIntroDone ? 'auto' : '0px',
+      overflow: 'hidden'
+    }}>
+      <h1>Light up the Sky 🏮</h1>
+      <p style={{ marginBottom: '15px' }}>Tap inside the sky to send a kiss.</p>
+
+      {/* THE NIGHT SKY CONTAINER */}
+      <div 
+        id="sky-container"
+        style={{
+          width: '100%',
+          height: '400px', // Fixed height for the container
+          background: 'linear-gradient(to bottom, #0f2027, #203a43, #2c5364)',
+          borderRadius: '20px',
+          position: 'relative',
+          overflow: 'hidden',
+          cursor: 'crosshair',
+          boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)'
+        }}
+        onClick={(e) => {
+          // Get the container's position to place lantern correctly
+          const rect = e.currentTarget.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+
+          // 1. Create Lantern
+          const lantern = document.createElement('div');
+          lantern.innerText = "🏮";
+          lantern.style.position = 'absolute'; // Absolute relative to container
+          lantern.style.left = x + 'px';
+          lantern.style.top = y + 'px';
+          lantern.style.fontSize = (Math.random() * 20 + 20) + 'px';
+          lantern.style.filter = 'drop-shadow(0 0 10px #ffaa00)';
+          lantern.style.zIndex = 10;
+          lantern.style.pointerEvents = 'none'; // Let clicks pass through
+          lantern.style.transform = 'translate(-50%, -50%)'; // Center on cursor
+          
+          document.getElementById('sky-container').appendChild(lantern);
+
+          // 2. Animate Float Up
+          // We use Web Animations API for smoother container-based animation
+          const animation = lantern.animate([
+            { transform: 'translate(-50%, -50%)', opacity: 1, top: y + 'px' },
+            { transform: `translate(-50%, -50%) translateX(${Math.random()*40 - 20}px)`, opacity: 0, top: '-50px' }
+          ], {
+            duration: Math.random() * 3000 + 4000, // 4-7 seconds
+            easing: 'ease-in'
+          });
+
+          // 3. Cleanup
+          animation.onfinish = () => lantern.remove();
+        }}
+      >
+        {/* Background Instruction */}
+        <div style={{ 
+          position: 'absolute', 
+          bottom: '20px', 
+          width: '100%', 
+          textAlign: 'center', 
+          color: 'rgba(255,255,255,0.3)',
+          pointerEvents: 'none'
+        }}>
+          (Tap anywhere here...)
+        </div>
+      </div>
+    </div>
   </div>
 )}
 
