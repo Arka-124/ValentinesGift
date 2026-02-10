@@ -329,39 +329,54 @@
   </div>
 )}
 
-           {/* PAGE 4: HUG DAY */}
-{page === 4 && (
+ {/* PAGE 5: HUG DAY (Squeezable Bear) */}
+{page === 5 && (
   <div className="content">
-    <h1>Emergency Hug Station 🚨</h1>
+    <h1>The Squeezable Bear 🧸</h1>
     <div className="story-text">
-      <p>Khub miss korchis.....tai na ? Press the button below immediately.</p>
-      
-      <button 
+      <p>I sent you a digital bear.</p>
+      <p><strong>SQUEEZE HIM</strong> (Click/Tap rapidly) to feel the love!</p>
+
+      <div 
         style={{
-          background: '#ff4757',
-          color: 'white',
-          border: 'none',
-          padding: '15px 30px',
-          fontSize: '1.2rem',
-          borderRadius: '50px',
+          marginTop: '30px',
           cursor: 'pointer',
-          marginTop: '20px',
-          boxShadow: '0 5px 15px rgba(255, 71, 87, 0.4)'
+          transition: 'transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          display: 'inline-block',
+          userSelect: 'none'
         }}
-        onClick={(e) => {
-          e.target.innerText = "🤗 SQUEEEEEZE! 🤗";
-          e.target.style.transform = "scale(0.95)";
-          setTimeout(() => {
-             e.target.innerText = "Send Another Hug";
-             e.target.style.transform = "scale(1)";
-          }, 2000);
+        onMouseDown={(e) => {
+          e.currentTarget.style.transform = 'scale(0.8, 0.8)'; // Squish
+          e.currentTarget.innerText = "😣"; // Face change
+        }}
+        onMouseUp={(e) => {
+          e.currentTarget.style.transform = 'scale(1.1, 1.1)'; // Bounce back big
+          e.currentTarget.innerText = "🧸";
+          setTimeout(() => e.currentTarget.style.transform = 'scale(1, 1)', 150); // Reset
+          
+          // Confetti Logic
+          const burst = document.createElement('div');
+          burst.innerText = "❤️";
+          burst.style.position = 'fixed';
+          burst.style.left = e.clientX + 'px';
+          burst.style.top = e.clientY + 'px';
+          burst.style.animation = 'floatUp 1s ease-out forwards';
+          document.body.appendChild(burst);
+          setTimeout(() => burst.remove(), 1000);
         }}
       >
-        Send Hug 🫂
-      </button>
+        <span style={{fontSize: '8rem', display: 'block'}}>🧸</span>
+      </div>
+
+      <style>{`
+        @keyframes floatUp {
+          0% { transform: translateY(0) scale(1); opacity: 1; }
+          100% { transform: translateY(-100px) scale(0); opacity: 0; }
+        }
+      `}</style>
       
-      <p style={{marginTop: '20px', fontSize: '0.9rem'}}>
-        *Note: Real hugs are currently being shipped to your location.*
+      <p style={{marginTop: '20px', fontSize: '0.9rem', color: '#888'}}>
+        (He loves tight hugs, don't worry)
       </p>
     </div>
   </div>
@@ -453,7 +468,7 @@
 )}
 
           {/* PAGE 6: VALENTINE'S PHOTOS (Feb 14) - OLD PAGE 3 */}
-          {page === 7 && (
+          {page === 6 && (
             <div className="content">
               <h1>Us ❤️</h1>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', width: '100%', marginTop: '20px' }}>
@@ -468,7 +483,7 @@
           )}
 
           {/* PAGE 7: FINAL MESSAGE (Feb 14) - OLD PAGE 4 */}
-          {page === 8 && (
+          {page === 7 && (
             <div className="content">
               <h1 style={{ fontSize: 'clamp(1.2rem, 6vw, 3rem)', lineHeight: '1.2', letterSpacing: '2px', wordBreak: 'normal' }}>HAPPY VALENTINE'S DAY! ❤️</h1>
               <p>To many more adventures together.</p>
