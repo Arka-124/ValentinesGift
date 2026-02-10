@@ -421,100 +421,72 @@
   </div>
 )}
 
-           {/* PAGE 5: KISS DAY (Floating Lanterns) */}
+           {/* PAGE 5: KISS DAY (Special Delivery) */}
 {page === 5 && (
   <div className="content">
-    {/* LOGIC: Handle the Intro Timer */}
-    {(() => {
-      React.useEffect(() => {
-        if (!kissIntroDone) {
-           const timer = setTimeout(() => setKissIntroDone(true), 3000); // 3 seconds intro
-           return () => clearTimeout(timer);
-        }
-      }, []);
-    })()}
+    <h1>Special Delivery 💌</h1>
+    <p>You have 1 unread message from Arka.</p>
 
-    {/* VIEW 1: INTRO TEXT (Fades out) */}
-    <div style={{
-      opacity: kissIntroDone ? 0 : 1,
-      transition: 'opacity 1s ease-in-out',
-      position: kissIntroDone ? 'absolute' : 'relative',
-      pointerEvents: 'none',
-      zIndex: 10
-    }}>
-      <h1 style={{ fontSize: '2.5rem', color: '#ff4757' }}>Happy KISS Day babyy 💋💋</h1>
-    </div>
+    <div 
+      style={{
+        margin: '40px auto',
+        cursor: 'pointer',
+        position: 'relative',
+        width: '200px',
+        height: '150px'
+      }}
+      onClick={(e) => {
+        const envelope = e.currentTarget;
+        if (envelope.getAttribute('data-opened')) return; // Only open once
+        envelope.setAttribute('data-opened', 'true');
 
-    {/* VIEW 2: THE LANTERN CONTAINER (Fades in) */}
-    <div style={{
-      opacity: kissIntroDone ? 1 : 0,
-      transition: 'opacity 1s ease-in-out 1s', // Delays fade-in slightly
-      height: kissIntroDone ? 'auto' : '0px',
-      overflow: 'hidden'
-    }}>
-      <h1>Light up the Sky 🏮</h1>
-      <p style={{ marginBottom: '15px' }}>Tap inside the sky to send a kiss.</p>
+        // 1. Change Envelope visual
+        document.getElementById('flap').style.transform = 'rotateX(180deg)';
+        document.getElementById('flap').style.zIndex = 0;
+        
+        // 2. The Kiss Flies Out
+        setTimeout(() => {
+          document.getElementById('flying-kiss').style.bottom = '200px';
+          document.getElementById('flying-kiss').style.opacity = '1';
+          document.getElementById('flying-kiss').style.transform = 'scale(3)';
+        }, 300);
 
-      {/* THE NIGHT SKY CONTAINER */}
-      <div 
-        id="sky-container"
-        style={{
-          width: '100%',
-          height: '400px', // Fixed height for the container
-          background: 'linear-gradient(to bottom, #0f2027, #203a43, #2c5364)',
-          borderRadius: '20px',
-          position: 'relative',
-          overflow: 'hidden',
-          cursor: 'crosshair',
-          boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)'
-        }}
-        onClick={(e) => {
-          // Get the container's position to place lantern correctly
-          const rect = e.currentTarget.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-
-          // 1. Create Lantern
-          const lantern = document.createElement('div');
-          lantern.innerText = "🏮";
-          lantern.style.position = 'absolute'; // Absolute relative to container
-          lantern.style.left = x + 'px';
-          lantern.style.top = y + 'px';
-          lantern.style.fontSize = (Math.random() * 20 + 20) + 'px';
-          lantern.style.filter = 'drop-shadow(0 0 10px #ffaa00)';
-          lantern.style.zIndex = 10;
-          lantern.style.pointerEvents = 'none'; // Let clicks pass through
-          lantern.style.transform = 'translate(-50%, -50%)'; // Center on cursor
-          
-          document.getElementById('sky-container').appendChild(lantern);
-
-          // 2. Animate Float Up
-          // We use Web Animations API for smoother container-based animation
-          const animation = lantern.animate([
-            { transform: 'translate(-50%, -50%)', opacity: 1, top: y + 'px' },
-            { transform: `translate(-50%, -50%) translateX(${Math.random()*40 - 20}px)`, opacity: 0, top: '-50px' }
-          ], {
-            duration: Math.random() * 3000 + 4000, // 4-7 seconds
-            easing: 'ease-in'
-          });
-
-          // 3. Cleanup
-          animation.onfinish = () => lantern.remove();
-        }}
-      >
-        {/* Background Instruction */}
-        <div style={{ 
-          position: 'absolute', 
-          bottom: '20px', 
-          width: '100%', 
-          textAlign: 'center', 
-          color: 'rgba(255,255,255,0.3)',
-          pointerEvents: 'none'
-        }}>
-          (Tap anywhere here...)
-        </div>
+        // 3. Message Appears
+        setTimeout(() => {
+          document.getElementById('hidden-msg').style.opacity = 1;
+        }, 1000);
+      }}
+    >
+      {/* Envelope Body */}
+      <div style={{
+        position: 'absolute', bottom: 0, width: '100%', height: '100px', 
+        background: '#ff4757', borderRadius: '0 0 10px 10px', zIndex: 2
+      }}></div>
+      
+      {/* Envelope Flap */}
+      <div id="flap" style={{
+        position: 'absolute', top: '50px', width: '0', height: '0',
+        borderLeft: '100px solid transparent',
+        borderRight: '100px solid transparent',
+        borderTop: '80px solid #ff6b81',
+        transformOrigin: 'top',
+        transition: 'transform 0.4s',
+        zIndex: 3
+      }}></div>
+      
+      {/* The Kiss Item */}
+      <div id="flying-kiss" style={{
+        position: 'absolute', bottom: '0', left: '50%', marginLeft: '-20px',
+        fontSize: '3rem', transition: 'all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+        opacity: 0, zIndex: 1
+      }}>
+        💋
       </div>
     </div>
+
+    <h2 id="hidden-msg" style={{ opacity: 0, transition: 'opacity 1s', color: '#ff4757' }}>
+      Muah! 😘
+    </h2>
   </div>
 )}
 
