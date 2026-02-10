@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Will you be my Valentine?</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      overflow-y: auto;
+      min-height: 100vh;
+    }
+
+    .container {
+      min-height: 100vh;
+      display: flex;
+      padding: 20px;
+      position: relative;
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 50%, #ff9a9e 100%);
+    }
+
+    /* Animation Classes */
+    .fade-layer {
+      transition: opacity 0.6s ease-in-out;
+      opacity: 1;
+      width: 100%;
+      display: flex;
+      margin: auto;
+      justify-content: center;
+      min-height: min-content;
+    }
+
+    .fade-out {
+      opacity: 0;
+    }
+
+    .content {
+      text-align: center;
+      max-width: 650px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 50px 40px;
+      border-radius: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      z-index: 10;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 30px;
+      justify-content: center;
+      margin-top: 40px;
+      position: relative;
+    }
+
+    .btn {
+      width: 160px;
+      height: 60px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-family: 'Quicksand', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-yes {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+
+    .btn-no {
+      background: white;
+      color: #ff4757;
+      position: relative;
+      border: 2px solid #fed6e3;
+    }
+
+    .btn-no.absolute {
+      position: fixed;
+      z-index: 1000;
+    }
+
+    .btn-next-fixed {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 2000;
+      background: #ff4757;
+      color: white;
+      width: 140px;
+      height: 55px;
+      transition: opacity 0.6s ease-in-out, transform 0.3s ease;
+    }
+
+    .btn-next-fixed:hover {
+      transform: scale(1.05);
+    }
+
+    h1 {
+      font-family: 'Pacifico', cursive;
+      color: #ff6b9d;
+      margin-bottom: 20px;
+    }
+
+    .story-text {
+      line-height: 1.8;
+      color: #555;
+      font-size: 1.1rem;
+    }
+
+    .yippee-screen {
+      position: fixed;
+      inset: 0;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .flash-text {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      color: #ff4757;
+      font-weight: bold;
+      z-index: 5000;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+  const { useState, useEffect } = React;
+
+  // --- CONFIGURATION: SET YOUR DATES HERE ---
+  // Format: "YYYY-MM-DD"
+  const UNLOCK_DATES = {
+    3: "2026-02-10", // Page 3 (Teddy Day) unlocks Feb 10
+    4: "2026-02-11", // Page 4 (Promise Day) unlocks Feb 11
+    5: "2026-02-12", // Page 5 (Hug Day) unlocks Feb 12
+    6: "2026-02-13", // Page 6 (Kiss Day) unlocks Feb 13
+    7: "2026-02-14", // Page 7 (The Final Reveal) unlocks Feb 14
+    8: "2026-02-14"  // Page 8 (Closing Message) unlocks Feb 14
+  };
+  // ------------------------------------------
+
+  function App() {
+    const [page, setPage] = useState(1);
+    const [isTransitioning, setIsTransitioning] = useState(false);
+    const [isNoAbsolute, setIsNoAbsolute] = useState(false);
+    const [noPosition, setNoPosition] = useState({ top: 'auto', left: 'auto' });
+    const [showFlash, setShowFlash] = useState(false);
+    const [showYippee, setShowYippee] = useState(false);
+    const [isNextUnlocked, setIsNextUnlocked] = useState(false);
+    const [timeMessage, setTimeMessage] = useState("");
+
+    // CHECK DATE LOGIC
+    useEffect(() => {
+      const checkDate = () => {
+        const nextPage = page + 1;
+        
+        // If there is no specific unlock date for the next page, it's open (Page 1 -> 2)
+        if (!UNLOCK_DATES[nextPage]) {
+          setIsNextUnlocked(true);
+          setTimeMessage("");
+          return;
+        }
+
+        const now = new Date();
+        const unlockDate = new Date(UNLOCK_DATES[nextPage] + "T00:00:00");
+
+        if (now >= unlockDate) {
+          setIsNextUnlocked(true);
+          setTimeMessage("");
+        } else {
+          setIsNextUnlocked(false);
+          const diff = unlockDate - now;
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+          const minutes = Math.floor((diff / (1000 * 60)) % 60);
+          
+          if (days > 0) setTimeMessage(`Opens in ${days}d ${hours}h`);
+          else if (hours > 0) setTimeMessage(`Opens in ${hours}h ${minutes}m`);
+          else setTimeMessage(`Opens in ${minutes}m`);
+        }
+      };
+
+      checkDate();
+      const timer = setInterval(checkDate, 60000); 
+      return () => clearInterval(timer);
+    }, [page]);
+
+    const triggerPageChange = (nextPage) => {
+      if (!isNextUnlocked && UNLOCK_DATES[nextPage]) {
+         alert(`No cheating! 😜 This unlocks on ${UNLOCK_DATES[nextPage]}`);
+         return;
+      }
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setPage(nextPage);
+        setIsTransitioning(false);
+      }, 600); 
+    };
+
+    const moveNoButton = () => {
+      if (!isNoAbsolute) setIsNoAbsolute(true);
+      const maxX = window.innerWidth - 160;
+      const maxY = window.innerHeight - 60;
+      setNoPosition({
+        left: `${Math.random() * maxX}px`,
+        top: `${Math.random() * maxY}px`
+      });
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 700);
+    };
+
+    const handleYes = () => {
+      setShowYippee(true);
+      setTimeout(() => {
+        setShowYippee(false);
+        triggerPageChange(2);
+      }, 2500);
+    };
+
+    return (
+      <div className="container">
+        {showFlash && <div className="flash-text">Wrong choice! Try again 😜</div>}
+
+        {showYippee && (
+          <div className="yippee-screen">
+            <h1 style={{ fontSize: '4rem' }}>Yippeeee! 🎉</h1>
+            <img src="ted-blow-a-kiss.gif" alt="Yippee" style={{ maxWidth: '300px', margin: '20px', borderRadius: '15px' }} />
+            <audio autoPlay>
+              <source src="yippee-tbh.mp3" type="audio/mpeg" />
+            </audio>
+          </div>
+        )}
+
+        <div className={`fade-layer ${isTransitioning ? 'fade-out' : ''}`}>
+
+          {/* PAGE 1: PROPOSAL (Always Open) */}
+          {page === 1 && (
+            <div className="content">
+              <h1>Arka sent you a request</h1>
+              <p style={{ fontSize: '1.4rem', color: '#ff4757' }}>Will you be my Valentine?</p>
+              <div className="button-container">
+                <button className="btn btn-yes" onClick={handleYes}>Yes ❤️</button>
+                <button
+                  className={`btn btn-no ${isNoAbsolute ? 'absolute' : ''}`}
+                  onMouseEnter={isNoAbsolute ? moveNoButton : null}
+                  onClick={moveNoButton}
+                  style={{ top: noPosition.top, left: noPosition.left }}
+                >No</button>
+              </div>
+            </div>
+          )}
+
+          {/* PAGE 2: STORY INTRO (Always Open) */}
+          {page === 2 && (
+            <div className="content">
+              <h1>Our First Valentine's ❤️</h1>
+              <div className="story-text">
+                This is our first Valentine's together, and my first one ever.
+                So I have prepared a something special for us.
+                <br/><br/>
+                Every day until the 14th, a new page will unlock. Come back tomorrow!
+              </div>
+            </div>
+          )}
+
+          {/* PAGE 3: TEDDY DAY (Feb 10) */}
+          {page === 3 && (
+            <div className="content">
+              <h1>Happy Teddy Day! 🧸</h1>
+              <div className="story-text">
+                You are softer and cuter than any teddy bear I could buy.
+                <br />
+                Sending you a big virtual hug today!
+                <br />
+                {/* ADD YOUR IMAGE/CONTENT HERE */}
+              </div>
+            </div>
+          )}
+
+          {/* PAGE 4: PROMISE DAY (Feb 11) */}
+          {page === 4 && (
+            <div className="content">
+              <h1>Happy Promise Day 🤞</h1>
+              <div className="story-text">
+                I promise to always be there for you, through the laughs and the tears.
+                <br />
+                (Write your own promise here!)
+              </div>
+            </div>
+          )}
+
+           {/* PAGE 5: HUG DAY (Feb 12) */}
+           {page === 5 && (
+            <div className="content">
+              <h1>Happy Hug Day 🤗</h1>
+              <div className="story-text">
+                I wish I could hug you right now. 
+                Consider this a raincheck for a very long hug when I see you.
+              </div>
+            </div>
+          )}
+
+           {/* PAGE 6: KISS DAY (Feb 13) */}
+           {page === 6 && (
+            <div className="content">
+              <h1>Happy Kiss Day 💋</h1>
+              <div className="story-text">
+                Sending you a thousand kisses. 
+                <br/>
+                Muah!
+              </div>
+            </div>
+          )}
+
+          {/* PAGE 7: VALENTINE'S PHOTOS (Feb 14) - OLD PAGE 3 */}
+          {page === 7 && (
+            <div className="content">
+              <h1>Us ❤️</h1>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', width: '100%', marginTop: '20px' }}>
+                <div style={{ width: '100%', padding: '10px', background: '#fff0f3', borderRadius: '15px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
+                  <img src="Photo1.png" alt="Us 1" style={{ width: '100%', borderRadius: '10px' }} />
+                </div>
+                <div style={{ width: '100%', padding: '10px', background: '#fff0f3', borderRadius: '15px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
+                  <img src="Photo2.png" alt="Us 2" style={{ width: '100%', borderRadius: '10px' }} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PAGE 8: FINAL MESSAGE (Feb 14) - OLD PAGE 4 */}
+          {page === 8 && (
+            <div className="content">
+              <h1 style={{ fontSize: 'clamp(1.2rem, 6vw, 3rem)', lineHeight: '1.2', letterSpacing: '2px', wordBreak: 'normal' }}>HAPPY VALENTINE'S DAY! ❤️</h1>
+              <p>To many more adventures together.</p>
+            </div>
+          )}
+        </div>
+
+        {/* LOCKED NEXT BUTTON */}
+        {page >= 2 && page < 8 && (
+          <button
+            className={`btn btn-next-fixed ${isTransitioning ? 'fade-out' : ''}`}
+            onClick={() => triggerPageChange(page + 1)}
+            disabled={!isNextUnlocked}
+            style={{
+              background: isNextUnlocked ? '#ff4757' : '#bdc3c7',
+              cursor: isNextUnlocked ? 'pointer' : 'not-allowed',
+              opacity: isNextUnlocked ? 1 : 0.8
+            }}
+          >
+            {isNextUnlocked ? 'Next →' : `🔒 ${timeMessage}`}
+          </button>
+        )}
+
+        {/* Audio */}
+        {
+          page >= 2 && (
+            <audio autoPlay loop>
+              <source src="TomarGaan.mp3" type="audio/mpeg" />
+            </audio>
+          )
+        }
+      </div >
+    );
+  }
+
+  ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+
+</html>
