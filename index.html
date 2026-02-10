@@ -420,88 +420,86 @@
   </div>
 )}
 
-           {/* PAGE 5: KISS DAY (Trajectory Simulator) */}
+           {/* PAGE 5: KISS DAY (Constellation) */}
 {page === 5 && (
-  <div className="content">
-    <h1>Kiss Trajectory 💋</h1>
+  <div className="content" style={{ background: '#0c0c1c', color: '#fff', boxShadow: '0 0 50px #1a1a2e inset' }}>
+    <h1>Galactic Kiss 🌌</h1>
+    <p style={{marginBottom: '20px'}}>Connect the stars to reveal the message.</p>
     
-    {/* Simulation Container */}
-    <div style={{
-      background: '#1a1a1a',
-      color: '#0f0',
-      fontFamily: 'monospace',
-      padding: '20px',
-      borderRadius: '10px',
-      textAlign: 'left',
-      height: '300px',
-      overflow: 'hidden',
-      position: 'relative',
-      boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-      marginTop: '20px'
-    }}>
-      {/* The Radar Scanner Animation */}
-      <div style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '200px',
-        height: '200px',
-        border: '2px solid #0f0',
-        borderRadius: '50%',
-        opacity: 0.3
-      }}></div>
-      <div style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        width: '100px',
-        height: '2px',
-        background: '#0f0',
-        transformOrigin: '0% 0%',
-        animation: 'spin 2s linear infinite' // Note: You'd need to add keyframes for spin in CSS or use inline style for rotation if possible, but this visual is enough
-      }}></div>
+    <div style={{ position: 'relative', height: '250px', width: '100%' }}>
+       {/* We use a self-invoking function to manage specific state for this game */}
+       {(() => {
+         // COORDINATES FOR A LIP SHAPE
+         const stars = [
+           {id: 1, x: 20, y: 100}, {id: 2, x: 80, y: 80}, {id: 3, x: 150, y: 90}, 
+           {id: 4, x: 220, y: 80}, {id: 5, x: 280, y: 100}, // Top lip line
+           {id: 6, x: 220, y: 130}, {id: 7, x: 150, y: 140}, {id: 8, x: 80, y: 130}, {id: 9, x: 20, y: 100} // Bottom lip loop
+         ];
 
-      {/* Dynamic Text Output */}
-<p>&gt; Initiating Kiss Sequence...</p>
-<p>&gt; Calculating Distance... <span style={{color: '#ff4757'}}>LDR_MODE_ACTIVE</span></p>
-<p>&gt; Wind Speed: 12km/h SE</p>
-<p>&gt; Heartbeat: <span style={{animation: 'pulse 0.5s infinite'}}>120 BPM</span></p>
-<p>&gt; Target Locked: <span style={{color: 'yellow'}}>MY VALENTINE</span></p>
-<br/>
-<p style={{textAlign: 'center', color: 'white'}}>
-  INCOMING...
-</p>
-      
-      {/* The Flying Kiss Emoji */}
-      <div style={{
-        position: 'absolute',
-        left: '0',
-        bottom: '20px',
-        fontSize: '3rem',
-        animation: 'flyAcross 3s ease-in-out infinite'
-      }}>
-        💋
-      </div>
-      
-      {/* Add this style block locally for the animations */}
-      <style>{`
-        @keyframes flyAcross {
-          0% { left: -50px; bottom: 20px; transform: rotate(0deg); }
-          50% { left: 50%; bottom: 100px; transform: rotate(180deg); }
-          100% { left: 110%; bottom: 20px; transform: rotate(360deg); }
-        }
-        @keyframes pulse {
-          0% { opacity: 1; }
-          50% { opacity: 0.5; }
-          100% { opacity: 1; }
-        }
-      `}</style>
+         // Use React State (this is a hack for single-file copy-paste)
+         // In a real app, define state at top of App component: const [connected, setConnected] = useState([1]);
+         if (!window.connectedStars) window.connectedStars = [1];
+         
+         // Force update helper
+         const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+
+         const handleClick = (id) => {
+           const last = window.connectedStars[window.connectedStars.length - 1];
+           // Allow connecting only next sequential star or closing the loop
+           if (id === last + 1 || (last === 9 && id === 1)) { 
+             window.connectedStars.push(id);
+             forceUpdate();
+           }
+         };
+
+         const isComplete = window.connectedStars.length >= 9 && window.connectedStars.includes(9);
+
+         return (
+           <svg width="300" height="200" style={{ overflow: 'visible', margin: '0 auto', display: 'block' }}>
+             {/* Draw Lines */}
+             {window.connectedStars.map((starId, i) => {
+               if (i === 0) return null;
+               const prev = stars.find(s => s.id === window.connectedStars[i-1]);
+               const curr = stars.find(s => s.id === starId);
+               return (
+                 <line 
+                   key={i} x1={prev.x} y1={prev.y} x2={curr.x} y2={curr.y} 
+                   stroke={isComplete ? "#ff00de" : "white"} 
+                   strokeWidth={isComplete ? "4" : "2"}
+                   style={{ transition: 'all 0.5s', filter: isComplete ? 'drop-shadow(0 0 10px #ff00de)' : 'none' }}
+                 />
+               );
+             })}
+
+             {/* Draw Stars */}
+             {stars.map((s) => (
+               <g key={s.id} onClick={() => handleClick(s.id)} style={{ cursor: 'pointer' }}>
+                 <circle 
+                   cx={s.x} cy={s.y} r={window.connectedStars.includes(s.id) ? 6 : 4} 
+                   fill={window.connectedStars.includes(s.id) ? "#ffd700" : "white"}
+                   className="star" 
+                 />
+                 {/* Pulse animation for the next target */}
+                 {!isComplete && s.id === (window.connectedStars[window.connectedStars.length-1] + 1) && (
+                   <circle cx={s.x} cy={s.y} r="15" fill="none" stroke="white" opacity="0.5">
+                     <animate attributeName="r" from="10" to="20" dur="1s" repeatCount="indefinite" />
+                     <animate attributeName="opacity" from="0.8" to="0" dur="1s" repeatCount="indefinite" />
+                   </circle>
+                 )}
+               </g>
+             ))}
+
+             {/* Completion Message */}
+             {isComplete && (
+               <text x="150" y="180" textAnchor="middle" fill="#ff00de" fontSize="20" style={{ animation: 'fadeIn 1s' }}>
+                 KISS UPLOADED TO THE STARS
+               </text>
+             )}
+           </svg>
+         );
+       })()}
     </div>
-
-    <p style={{marginTop: '15px', fontSize: '0.9rem'}}>
-      *Estimated arrival time: Immediate*
-    </p>
+    <style>{`@keyframes fadeIn { from {opacity:0} to {opacity:1} }`}</style>
   </div>
 )}
 
